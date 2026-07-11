@@ -1,4 +1,8 @@
 package model.enums;
 
-public class ProgramState {
+public enum ProgramState {
+  INSTALLED,
+  RUNNING,
+  STOPPED,
+  REMOVED
 }

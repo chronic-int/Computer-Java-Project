@@ -1,4 +1,5 @@
 package model.Interfaces;
 
-public class EnergyConsumer {
+public interface EnergyConsumer {
+  int getPowerConsumptionWatts();
 }

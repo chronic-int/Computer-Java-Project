@@ -1,4 +1,8 @@
 package model.enums;
 
-public class ComputerState {
+public enum ComputerState {
+  OFF,
+  POST,
+  ON,
+  ERROR
 }

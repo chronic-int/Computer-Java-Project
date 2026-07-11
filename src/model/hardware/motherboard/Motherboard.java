@@ -1,45 +1,41 @@
-package model.Hardware.MotherBoard;
+package model.hardware.motherboard;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import model.enums.TipoDDR;
 import model.enums.TipoMotherboard;
 import model.enums.TipoSocket;
+import model.hardware.slots.SlotM2;
+import model.hardware.slots.SlotPCIe;
+import model.hardware.slots.SlotRAM;
+import model.hardware.slots.SocketCPU;
+import model.sistema.BIOS;
 
 public class Motherboard {
-
-  // Identidade
-
   private final String marca;
   private final String modelo;
   private final String numeroSerie;
+  private final TipoMotherboard tipo;
+  private final SocketCPU socketCPU;
+  private final List<SlotRAM> slotsRam;
+  private final List<SlotPCIe> slotsPCIe;
+  private final List<SlotM2> slotsM2;
+  private final BIOS bios;
 
-  // Especificações
-
-  private final TipoMotherboard tipo; // <- Variaveis de outra classe ainda será associada.
-  private final TipoSocket socket;
-
-  // capacidade
-
-  private final int quantidadeSlotsRam;
-  private final int quantidadeSlotsPCIe;
-  private final int quantidadeSlotsM2;
-  private final int quantidadeSlotsSATA;
-
-  // Construtor
   public Motherboard(String marca, String modelo, String numeroSerie, TipoMotherboard tipo,
-      TipoSocket socket, int quantidadeSlotsRam, int quantidadeSlotsPCIe, int quantidadeSlotsM2,
-      int quantidadeSlotsSATA) {
-
+      TipoSocket socket, TipoDDR tipoDDR, int quantidadeSlotsRam, int quantidadeSlotsPCIe,
+      int quantidadeSlotsM2, BIOS bios) {
     this.marca = marca;
     this.modelo = modelo;
     this.numeroSerie = numeroSerie;
     this.tipo = tipo;
-    this.socket = socket;
-    this.quantidadeSlotsRam = quantidadeSlotsRam;
-    this.quantidadeSlotsPCIe = quantidadeSlotsPCIe;
-    this.quantidadeSlotsM2 = quantidadeSlotsM2;
-    this.quantidadeSlotsSATA = quantidadeSlotsSATA;
+    this.socketCPU = new SocketCPU(socket);
+    this.slotsRam = criarSlotsRam(quantidadeSlotsRam, tipoDDR);
+    this.slotsPCIe = criarSlotsPCIe(quantidadeSlotsPCIe);
+    this.slotsM2 = criarSlotsM2(quantidadeSlotsM2);
+    this.bios = bios;
   }
-
-  // Getters
 
   public String getMarca() {
     return marca;
@@ -53,27 +49,52 @@ public class Motherboard {
     return numeroSerie;
   }
 
-  public String getTipo() {
+  public TipoMotherboard getTipo() {
     return tipo;
   }
 
-  public String getSocket() {
-    return socket;
+  public SocketCPU getSocketCPU() {
+    return socketCPU;
   }
 
-  public int getQuantidadeSlotsRam() {
-    return quantidadeSlotsRam;
+  public List<SlotRAM> getSlotsRam() {
+    return Collections.unmodifiableList(slotsRam);
   }
 
-  public int getQuantidadeSlotsPCIe() {
-    return quantidadeSlotsPCIe;
+  public List<SlotPCIe> getSlotsPCIe() {
+    return Collections.unmodifiableList(slotsPCIe);
   }
 
-  public int getQuantidadeSlotsM2() {
-    return quantidadeSlotsM2;
+  public List<SlotM2> getSlotsM2() {
+    return Collections.unmodifiableList(slotsM2);
   }
 
-  public int getQuantidadeSlotsSATA() {
-    return quantidadeSlotsSATA;
+  public BIOS getBios() {
+    return bios;
+  }
+
+  private List<SlotRAM> criarSlotsRam(int quantidade, TipoDDR tipoDDR) {
+    List<SlotRAM> slots = new ArrayList<>();
+    for (int i = 1; i <= quantidade; i++) {
+      String canal = i % 2 == 0 ? "B" : "A";
+      slots.add(new SlotRAM(i, canal, tipoDDR));
+    }
+    return slots;
+  }
+
+  private List<SlotPCIe> criarSlotsPCIe(int quantidade) {
+    List<SlotPCIe> slots = new ArrayList<>();
+    for (int i = 1; i <= quantidade; i++) {
+      slots.add(new SlotPCIe(i));
+    }
+    return slots;
+  }
+
+  private List<SlotM2> criarSlotsM2(int quantidade) {
+    List<SlotM2> slots = new ArrayList<>();
+    for (int i = 1; i <= quantidade; i++) {
+      slots.add(new SlotM2(i));
+    }
+    return slots;
   }
 }

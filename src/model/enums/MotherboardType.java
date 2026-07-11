@@ -1,4 +1,7 @@
 package model.enums;
 
-public class MotherboardType {
+public enum MotherboardType {
+  ATX,
+  MICRO_ATX,
+  MINI_ITX
 }

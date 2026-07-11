@@ -1,4 +1,5 @@
 package model.Interfaces;
 
-public class Bootable {
+public interface Bootable {
+  String boot();
 }

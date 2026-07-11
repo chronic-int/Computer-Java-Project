@@ -1,4 +1,7 @@
 package model.enums;
 
-public class SocketType {
+public enum SocketType {
+  AM4,
+  AM5,
+  LGA1700
 }

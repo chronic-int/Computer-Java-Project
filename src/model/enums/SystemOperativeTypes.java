@@ -1,4 +1,8 @@
 package model.enums;
 
-public class SystemOperativeTypes {
+public enum SystemOperativeTypes {
+  WINDOWS,
+  LINUX,
+  MACOS,
+  NO_SYSTEM
 }

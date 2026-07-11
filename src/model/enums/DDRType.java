@@ -1,4 +1,7 @@
 package model.enums;
 
-public class DDRType {
+public enum DDRType {
+  DDR3,
+  DDR4,
+  DDR5
 }

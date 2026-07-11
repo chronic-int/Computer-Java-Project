@@ -1,4 +1,5 @@
 package model.Interfaces;
 
-public class Upgradable {
+public interface Upgradable {
+  void upgrade(String newVersion);
 }

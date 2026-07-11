@@ -3,6 +3,7 @@ package app;
 import command.DesligarComputadorCommand;
 import command.LigarComputadorCommand;
 import exception.BootException;
+import exception.HardwareCatastrophicException;
 import exception.HardwareException;
 import java.util.Scanner;
 import model.computador.Computador;
@@ -102,13 +103,34 @@ public class JogoMontagemComputador {
         case 17:
           diagnostico();
           break;
+        case 18:
+          usarPulseiraAntiestatica();
+          break;
+        case 19:
+          instalarEspacadores();
+          break;
+        case 20:
+          aplicarPastaTermica();
+          break;
+        case 21:
+          ligarCaboEps();
+          break;
+        case 22:
+          ligarCaboPcie();
+          break;
+        case 23:
+          executarJogo3D();
+          break;
         case 0:
+          config.getHardwareService().pararSimulacao();
           System.out.println("A sair da oficina.");
           break;
         default:
           System.out.println("Opcao invalida.");
           break;
       }
+    } catch (HardwareCatastrophicException ex) {
+      renderizarBsod(ex.getCodigoParagem(), ex.getMessage());
     } catch (HardwareException | BootException ex) {
       System.out.println("Falha: " + ex.getMessage());
     }
@@ -204,5 +226,53 @@ public class JogoMontagemComputador {
 
   private void diagnostico() {
     System.out.println(config.getDiagnosticoService().gerarRelatorio(computador));
+  }
+
+  private void usarPulseiraAntiestatica() {
+    config.getHardwareService().descarregarEstaticidade(computador);
+    System.out.println("Pulseira antiestatica activa. Pode manusear RAM e GPU com seguranca.");
+  }
+
+  private void instalarEspacadores() {
+    config.getHardwareService().instalarEspacadores(computador);
+    System.out.println("Parafusos espacadores instalados no gabinete.");
+  }
+
+  private void aplicarPastaTermica() {
+    config.getHardwareService().aplicarPastaTermica(computador);
+    System.out.println("Pasta termica aplicada entre CPU e cooler.");
+  }
+
+  private void ligarCaboEps() {
+    config.getHardwareService().ligarCaboEpsCpu(computador);
+    System.out.println("Cabo EPS de 8 pinos do CPU ligado.");
+  }
+
+  private void ligarCaboPcie() {
+    config.getHardwareService().ligarCaboPcieGpu(computador);
+    System.out.println("Cabo PCIe suplementar da GPU ligado.");
+  }
+
+  private void executarJogo3D() {
+    config.getProgramaController().executar("Jogo 3D");
+    config.getHardwareService().simularTick(computador);
+    System.out.println("Jogo 3D em execucao. Consumo e temperatura aumentaram.");
+  }
+
+  private void renderizarBsod(String codigo, String mensagem) {
+    for (int i = 0; i < 30; i++) {
+      System.out.println();
+    }
+    System.out.println("============================================================");
+    System.out.println("                       BLUE SCREEN");
+    System.out.println("============================================================");
+    System.out.println(":(");
+    System.out.println("O PC encontrou um problema fatal e foi desligado.");
+    System.out.println();
+    System.out.println("STOP CODE: " + codigo);
+    System.out.println(mensagem);
+    System.out.println();
+    System.out.println("Verifique montagem mecanica, energia, temperatura, RAM e GPU.");
+    System.out.println("============================================================");
   }
 }

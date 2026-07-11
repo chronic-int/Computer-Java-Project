@@ -1,9 +1,10 @@
 package model.hardware.armazenamento;
 
 import model.enums.SistemaOperativoTipo;
+import model.hardware.ComponenteHardware;
 import model.sistema.SistemaOperativo;
 
-public class SSD {
+public class SSD extends ComponenteHardware {
   private final String marca;
   private final String modelo;
   private final int capacidadeGb;
@@ -12,6 +13,7 @@ public class SSD {
   private final int consumoWatts;
 
   public SSD(String marca, String modelo, int capacidadeGb, boolean contemSistemaOperativo) {
+    super();
     this.marca = marca;
     this.modelo = modelo;
     this.capacidadeGb = capacidadeGb;
@@ -23,6 +25,7 @@ public class SSD {
   }
 
   public SSD(String marca, String modelo, int capacidadeGb, SistemaOperativoTipo tipo) {
+    super();
     this.marca = marca;
     this.modelo = modelo;
     this.capacidadeGb = capacidadeGb;

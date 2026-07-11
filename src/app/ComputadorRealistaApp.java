@@ -1,6 +1,7 @@
 package app;
 
 import exception.BootException;
+import exception.HardwareCatastrophicException;
 import exception.HardwareException;
 import exception.ProgramaException;
 import java.awt.BorderLayout;
@@ -55,6 +56,7 @@ public class ComputadorRealistaApp extends JFrame {
   private final DefaultListModel<String> processosModel;
   private final JTextArea consola;
   private final JTextArea ficheirosArea;
+  private final JTextArea monitorArea;
   private final JLabel estadoLabel;
   private final JLabel consumoLabel;
   private final JLabel cpuLabel;
@@ -80,6 +82,7 @@ public class ComputadorRealistaApp extends JFrame {
     this.processosModel = new DefaultListModel<>();
     this.consola = new JTextArea();
     this.ficheirosArea = new JTextArea();
+    this.monitorArea = new JTextArea();
     this.estadoLabel = new JLabel();
     this.consumoLabel = new JLabel();
     this.cpuLabel = new JLabel();
@@ -162,6 +165,16 @@ public class ComputadorRealistaApp extends JFrame {
 
     JPanel accoes = new JPanel(new FlowLayout(FlowLayout.LEFT));
     accoes.add(botao("Montar PC recomendado", this::montarRecomendado));
+    accoes.add(botao("Usar pulseira antiestatica", () -> instalar(() ->
+        config.getHardwareService().descarregarEstaticidade(computador), "Tecnico aterrado. Risco ESD reduzido.")));
+    accoes.add(botao("Instalar espacadores", () -> instalar(() ->
+        config.getHardwareService().instalarEspacadores(computador), "Parafusos espacadores instalados.")));
+    accoes.add(botao("Aplicar pasta termica", () -> instalar(() ->
+        config.getHardwareService().aplicarPastaTermica(computador), "Pasta termica aplicada.")));
+    accoes.add(botao("Ligar EPS CPU", () -> instalar(() ->
+        config.getHardwareService().ligarCaboEpsCpu(computador), "Cabo EPS do CPU ligado.")));
+    accoes.add(botao("Ligar PCIe GPU", () -> instalar(() ->
+        config.getHardwareService().ligarCaboPcieGpu(computador), "Cabo PCIe da GPU ligado.")));
     accoes.add(botao("Criar componente", this::criarComponente));
     accoes.add(botao("Start", this::ligarComputador));
     accoes.add(botao("Desligar", this::desligarComputador));
@@ -200,8 +213,17 @@ public class ComputadorRealistaApp extends JFrame {
 
     JSplitPane split = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, programasScroll, processosScroll);
     split.setResizeWeight(0.5);
+    monitorArea.setEditable(false);
+    monitorArea.setFont(new Font(Font.MONOSPACED, Font.BOLD, 15));
+    monitorArea.setBackground(Color.BLACK);
+    monitorArea.setForeground(new Color(120, 255, 160));
+    monitorArea.setBorder(BorderFactory.createEmptyBorder(16, 16, 16, 16));
+    JScrollPane monitorScroll = new JScrollPane(monitorArea);
+    monitorScroll.setBorder(BorderFactory.createTitledBorder("Monitor virtual"));
+    JSplitPane vertical = new JSplitPane(JSplitPane.VERTICAL_SPLIT, split, monitorScroll);
+    vertical.setResizeWeight(0.55);
     painel.add(botoes, BorderLayout.NORTH);
-    painel.add(split, BorderLayout.CENTER);
+    painel.add(vertical, BorderLayout.CENTER);
     return painel;
   }
 
@@ -235,11 +257,16 @@ public class ComputadorRealistaApp extends JFrame {
 
   private void montarRecomendado() {
     instalar(() -> config.getHardwareController().instalarGabinete(item(gabineteCombo)), "Gabinete instalado.");
+    instalar(() -> config.getHardwareService().descarregarEstaticidade(computador), "Pulseira antiestatica activa.");
+    instalar(() -> config.getHardwareService().instalarEspacadores(computador), "Espacadores instalados.");
     instalar(() -> config.getHardwareController().instalarFonte(item(fonteCombo)), "Fonte instalada.");
     instalar(() -> config.getHardwareController().instalarMotherboard(item(motherboardCombo)), "Motherboard instalada.");
     instalar(() -> config.getHardwareController().instalarCPU(item(cpuCombo)), "CPU instalada.");
+    instalar(() -> config.getHardwareService().aplicarPastaTermica(computador), "Pasta termica aplicada.");
     instalar(() -> config.getHardwareController().instalarRAM(item(ramCombo)), "RAM instalada.");
     instalar(() -> config.getHardwareController().instalarGPU(item(gpuCombo)), "GPU instalada.");
+    instalar(() -> config.getHardwareService().ligarCaboEpsCpu(computador), "Cabo EPS ligado.");
+    instalar(() -> config.getHardwareService().ligarCaboPcieGpu(computador), "Cabo PCIe ligado.");
     instalar(() -> config.getHardwareController().instalarSSD(item(ssdCombo)), "SSD instalado.");
   }
 
@@ -248,8 +275,12 @@ public class ComputadorRealistaApp extends JFrame {
       String resultado = config.getBootService().ligar(computador);
       log(resultado);
       arrancarSistemaOperativo();
+    } catch (HardwareCatastrophicException ex) {
+      mostrarBsod(ex.getCodigoParagem(), ex.getMessage());
+      log("Falha catastrofica: " + ex.getMessage());
     } catch (BootException | HardwareException ex) {
       log("Falha no arranque: " + ex.getMessage());
+      mostrarBlackScreen(ex.getMessage());
     }
     actualizarTudo();
   }
@@ -300,6 +331,7 @@ public class ComputadorRealistaApp extends JFrame {
       if (cpu != null) {
         log(cpu.processarInstrucao("EXEC " + nome.trim()));
       }
+      config.getHardwareService().simularTick(computador);
       log("Programa em execucao: " + nome.trim());
     } catch (ProgramaException ex) {
       log("Nao foi possivel executar: " + ex.getMessage());
@@ -316,6 +348,7 @@ public class ComputadorRealistaApp extends JFrame {
     for (String linha : cpu.executarPrograma(Arrays.asList("FETCH", "DECODE", "ALLOCATE_RAM", "DRAW_FRAME", "WRITE_DISK"))) {
       log(linha);
     }
+    config.getHardwareService().simularTick(computador);
     actualizarTudo();
   }
 
@@ -399,21 +432,27 @@ public class ComputadorRealistaApp extends JFrame {
     actualizarProcessos();
     actualizarFicheiros();
     actualizarEstado();
+    actualizarMonitor();
   }
 
   private void actualizarComponentes() {
     componentesModel.clear();
     if (computador.getGabinete() != null) {
       componentesModel.addElement("Gabinete: " + computador.getGabinete().getModelo());
+      componentesModel.addElement("Espacadores: " + (computador.getGabinete().isEspacadoresInstalados() ? "sim" : "nao"));
     }
     if (computador.getFonte() != null) {
       componentesModel.addElement("Fonte: " + computador.getFonte().getDescricao());
+      componentesModel.addElement("EPS CPU: " + (computador.getFonte().isCaboEpsCpuLigado() ? "ligado" : "desligado"));
+      componentesModel.addElement("PCIe GPU: " + (computador.getFonte().isCaboPcieGpuLigado() ? "ligado" : "desligado"));
     }
     if (computador.getMotherboard() != null) {
       Motherboard mb = computador.getMotherboard();
       componentesModel.addElement("Motherboard: " + mb.getMarca() + " " + mb.getModelo());
       if (mb.getSocketCPU().estaOcupado()) {
-        componentesModel.addElement("CPU: " + mb.getSocketCPU().getCpu().getNome());
+        CPU cpu = mb.getSocketCPU().getCpu();
+        componentesModel.addElement("CPU: " + cpu.getNome() + " | "
+            + String.format("%.1fC %.0f%%", cpu.getTemperaturaAtual(), cpu.getIntegridade()));
       }
       mb.getSlotsRam().stream().filter(slot -> slot.estaOcupado())
           .forEach(slot -> componentesModel.addElement("RAM slot " + slot.getNumero() + ": " + slot.getModulo().getDescricao()));
@@ -458,7 +497,7 @@ public class ComputadorRealistaApp extends JFrame {
     estadoLabel.setText("Estado: " + computador.getEstado());
     estadoLabel.setForeground(new Color(25, 85, 25));
     try {
-      consumoLabel.setText("Consumo: " + config.getHardwareService().calcularConsumoWatts(computador) + "W");
+      consumoLabel.setText("Consumo: " + config.getHardwareService().calcularConsumoWattsEmTempoReal(computador) + "W");
     } catch (RuntimeException ex) {
       consumoLabel.setText("Consumo: indisponivel");
     }
@@ -466,8 +505,44 @@ public class ComputadorRealistaApp extends JFrame {
     if (cpu == null) {
       cpuLabel.setText("CPU: ausente");
     } else {
-      cpuLabel.setText(String.format("CPU: %.0f%%, %d instr.", cpu.getUtilizacaoPercentagem(), cpu.getInstrucoesExecutadas()));
+      cpuLabel.setText(String.format("CPU: %.0f%%, %.1fC, %d instr.", cpu.getUtilizacaoPercentagem(),
+          cpu.getTemperaturaAtual(), cpu.getInstrucoesExecutadas()));
     }
+  }
+
+  private void actualizarMonitor() {
+    if (computador.getErroFatal() != null) {
+      mostrarBsod(computador.getCodigoParagem(), computador.getErroFatal());
+      return;
+    }
+    if (computador.getSistemaOperativo() == null) {
+      monitorArea.setBackground(Color.BLACK);
+      monitorArea.setForeground(new Color(120, 255, 160));
+      monitorArea.setText("NO SIGNAL\n\nMonte o PC, instale o SSD com sistema e carregue em Start.");
+      return;
+    }
+    monitorArea.setBackground(Color.BLACK);
+    monitorArea.setForeground(new Color(120, 255, 160));
+    monitorArea.setText("Desktop activo: " + computador.getSistemaOperativo().getNome()
+        + " " + computador.getSistemaOperativo().getVersao() + System.lineSeparator()
+        + "Processos: " + computador.getSistemaOperativo().getProcessos().size() + System.lineSeparator()
+        + "Estado: " + computador.getEstado());
+  }
+
+  private void mostrarBlackScreen(String detalhe) {
+    monitorArea.setBackground(Color.BLACK);
+    monitorArea.setForeground(Color.LIGHT_GRAY);
+    monitorArea.setText("BLACK SCREEN" + System.lineSeparator() + detalhe);
+  }
+
+  private void mostrarBsod(String codigo, String detalhe) {
+    monitorArea.setBackground(new Color(0, 80, 170));
+    monitorArea.setForeground(Color.WHITE);
+    monitorArea.setText(":( O PC encontrou um problema e precisa de ser desligado."
+        + System.lineSeparator() + System.lineSeparator()
+        + "STOP CODE: " + codigo + System.lineSeparator()
+        + detalhe + System.lineSeparator() + System.lineSeparator()
+        + "Diagnostico: verifique energia, temperatura, RAM, GPU e montagem mecanica.");
   }
 
   private String estadoDetalhado() {
@@ -475,7 +550,11 @@ public class ComputadorRealistaApp extends JFrame {
         + " " + computador.getSistemaOperativo().getVersao();
     return "Sistema operativo: " + so + System.lineSeparator()
         + "Pastas: " + computador.getSistemaFicheiros().getPastas().size() + System.lineSeparator()
-        + "Programas instalados: " + config.getProgramaService().getProgramaRepository().listar().size();
+        + "Programas instalados: " + config.getProgramaService().getProgramaRepository().listar().size()
+        + System.lineSeparator()
+        + "Pulseira antiestatica: " + computador.isPulseiraAntiestaticaActiva()
+        + System.lineSeparator()
+        + "Erro fatal: " + (computador.getErroFatal() == null ? "nenhum" : computador.getErroFatal());
   }
 
   private CPU obterCpu() {

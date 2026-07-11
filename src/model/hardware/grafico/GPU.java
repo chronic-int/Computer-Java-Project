@@ -1,12 +1,15 @@
 package model.hardware.grafico;
 
-public class GPU {
+import model.hardware.ComponenteHardware;
+
+public class GPU extends ComponenteHardware {
   private final String marca;
   private final String modelo;
   private final int memoriaGb;
   private final int consumoWatts;
 
   public GPU(String marca, String modelo, int memoriaGb, int consumoWatts) {
+    super();
     this.marca = marca;
     this.modelo = modelo;
     this.memoriaGb = memoriaGb;

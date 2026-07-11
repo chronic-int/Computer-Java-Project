@@ -5,6 +5,7 @@ import model.enums.TipoMotherboard;
 public class Gabinete {
   private final String modelo;
   private final TipoMotherboard maiorFormatoSuportado;
+  private boolean espacadoresInstalados;
 
   public Gabinete(String modelo, TipoMotherboard maiorFormatoSuportado) {
     this.modelo = modelo;
@@ -17,5 +18,13 @@ public class Gabinete {
 
   public boolean suporta(TipoMotherboard tipoMotherboard) {
     return maiorFormatoSuportado.ordinal() <= tipoMotherboard.ordinal();
+  }
+
+  public boolean isEspacadoresInstalados() {
+    return espacadoresInstalados;
+  }
+
+  public void instalarEspacadores() {
+    this.espacadoresInstalados = true;
   }
 }

@@ -21,6 +21,12 @@ public class Menus {
         + "15 - Testar rede" + System.lineSeparator()
         + "16 - Ativar seguranca" + System.lineSeparator()
         + "17 - Diagnostico" + System.lineSeparator()
+        + "18 - Usar pulseira antiestatica" + System.lineSeparator()
+        + "19 - Instalar parafusos espacadores" + System.lineSeparator()
+        + "20 - Aplicar pasta termica" + System.lineSeparator()
+        + "21 - Ligar cabo EPS do CPU" + System.lineSeparator()
+        + "22 - Ligar cabo PCIe da GPU" + System.lineSeparator()
+        + "23 - Executar Jogo 3D" + System.lineSeparator()
         + "0 - Sair" + System.lineSeparator()
         + "Escolha: ";
   }

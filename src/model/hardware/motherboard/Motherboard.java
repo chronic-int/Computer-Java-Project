@@ -10,9 +10,10 @@ import model.hardware.slots.SlotM2;
 import model.hardware.slots.SlotPCIe;
 import model.hardware.slots.SlotRAM;
 import model.hardware.slots.SocketCPU;
+import model.hardware.ComponenteHardware;
 import model.sistema.BIOS;
 
-public class Motherboard {
+public class Motherboard extends ComponenteHardware {
   private final String marca;
   private final String modelo;
   private final String numeroSerie;
@@ -22,10 +23,12 @@ public class Motherboard {
   private final List<SlotPCIe> slotsPCIe;
   private final List<SlotM2> slotsM2;
   private final BIOS bios;
+  private boolean temPastaTermica;
 
   public Motherboard(String marca, String modelo, String numeroSerie, TipoMotherboard tipo,
       TipoSocket socket, TipoDDR tipoDDR, int quantidadeSlotsRam, int quantidadeSlotsPCIe,
       int quantidadeSlotsM2, BIOS bios) {
+    super();
     this.marca = marca;
     this.modelo = modelo;
     this.numeroSerie = numeroSerie;
@@ -71,6 +74,14 @@ public class Motherboard {
 
   public BIOS getBios() {
     return bios;
+  }
+
+  public boolean temPastaTermica() {
+    return temPastaTermica;
+  }
+
+  public void aplicarPastaTermica() {
+    this.temPastaTermica = true;
   }
 
   private List<SlotRAM> criarSlotsRam(int quantidade, TipoDDR tipoDDR) {

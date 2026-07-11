@@ -1,8 +1,9 @@
 package model.hardware.memoria;
 
 import model.enums.TipoDDR;
+import model.hardware.ComponenteHardware;
 
-public class RAM {
+public class RAM extends ComponenteHardware {
   private final String marca;
   private final int capacidadeGb;
   private final TipoDDR tipoDDR;
@@ -10,6 +11,7 @@ public class RAM {
   private final int consumoWatts;
 
   public RAM(String marca, int capacidadeGb, TipoDDR tipoDDR, int frequenciaMhz) {
+    super();
     this.marca = marca;
     this.capacidadeGb = capacidadeGb;
     this.tipoDDR = tipoDDR;

@@ -20,6 +20,9 @@ public class Computador {
   private final SistemaFicheiros sistemaFicheiros;
   private EstadoComputador estado;
   private final List<String> perifericos;
+  private boolean pulseiraAntiestaticaActiva;
+  private String erroFatal;
+  private String codigoParagem;
 
   public Computador(String marca, String modelo) {
     this.marca = marca;
@@ -87,5 +90,32 @@ public class Computador {
 
   public void adicionarPeriferico(String periferico) {
     perifericos.add(periferico);
+  }
+
+  public boolean isPulseiraAntiestaticaActiva() {
+    return pulseiraAntiestaticaActiva;
+  }
+
+  public void setPulseiraAntiestaticaActiva(boolean pulseiraAntiestaticaActiva) {
+    this.pulseiraAntiestaticaActiva = pulseiraAntiestaticaActiva;
+  }
+
+  public String getErroFatal() {
+    return erroFatal;
+  }
+
+  public String getCodigoParagem() {
+    return codigoParagem;
+  }
+
+  public void registarErroFatal(String erroFatal, String codigoParagem) {
+    this.erroFatal = erroFatal;
+    this.codigoParagem = codigoParagem;
+    this.estado = EstadoComputador.ERRO;
+  }
+
+  public void limparErroFatal() {
+    this.erroFatal = null;
+    this.codigoParagem = null;
   }
 }

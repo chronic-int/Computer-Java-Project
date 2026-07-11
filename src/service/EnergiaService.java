@@ -15,7 +15,7 @@ public class EnergiaService {
       throw new HardwareException("Nao existe fonte de alimentacao instalada.");
     }
 
-    int consumo = hardwareService.calcularConsumoWatts(computador);
+    int consumo = hardwareService.calcularConsumoWattsEmTempoReal(computador);
     int margemSegura = (int) Math.ceil(consumo * 1.3);
     if (computador.getFonte().getPotenciaWatts() < margemSegura) {
       throw new HardwareException("Fonte insuficiente. Consumo estimado: " + consumo
